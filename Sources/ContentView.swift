@@ -29,6 +29,8 @@ struct ContentView: View {
             }
         }
         .overlay(alignment: .bottom) { ToastView() }
+        // The viewer and triage take the whole window, toolbar included.
+        .toolbar(lib.viewer != nil || lib.triage != nil ? .hidden : .automatic, for: .windowToolbar)
         .animation(.spring(response: 0.35, dampingFraction: 0.86), value: lib.viewer != nil)
         .animation(.spring(response: 0.35, dampingFraction: 0.86), value: lib.triage != nil)
         .sheet(item: $lib.moveRequest) { MovePalette(request: $0) }

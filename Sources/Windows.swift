@@ -69,7 +69,11 @@ struct ExpensesView: View {
         let receipts = lib.shots.filter { $0.folder == "Receipts" || $0.folder.hasPrefix("Receipts/") }
         let index = lib.sorter.index
         let parsed = await Task.detached(priority: .userInitiated) {
-            receipts.map { ReceiptParser.expense(path: $0.id, text: index.text(forPath: $0.id) ?? "", taken: $0.date) }
+            // An exact duplicate of a receipt is the same expense; count it once.
+            let hashes = Dictionary(index.entries().compactMap { e in e.hash.map { (e.path, $0) } }, uniquingKeysWith: { a, _ in a })
+            var seen = Set<String>()
+            let unique = receipts.filter { s in hashes[s.id].map { seen.insert($0).inserted } ?? true }
+            return unique.map { ReceiptParser.expense(path: $0.id, text: index.text(forPath: $0.id) ?? "", taken: $0.date) }
         }.value
         withAnimation { rows = parsed.sorted(using: sortOrder) }
     }

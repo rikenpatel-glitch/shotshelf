@@ -1,3 +1,5 @@
+<p align="center"><img src="docs/images/hero.png" alt="Shotshelf: a folder sidebar of sorted screenshot categories next to a grid of screenshots grouped by date" width="100%"></p>
+
 # Shotshelf
 
 A Mac app that files every screenshot you take into the right folder, and gives you a fast place to browse, search and tidy them.
@@ -19,6 +21,8 @@ Take a screenshot of a receipt and it lands in `Receipts/Food & Dining/Chipotle`
 - Create `Receipts/Food & Dining/Joe's Pizza` once, and Joe's Pizza receipts go there from then on
 - A notification after each sort, with a **Move...** button if it guessed wrong
 
+<p align="center"><img src="docs/images/how-it-works.svg" alt="Screenshot lands in your folder, is read on-device, every rule is scored, then it is filed or left in General for Triage" width="100%"></p>
+
 **Browsing**
 - Folder sidebar with counts; drag screenshots onto any folder, or drag them out into other apps
 - Search the words inside every screenshot
@@ -27,9 +31,15 @@ Take a screenshot of a receipt and it lands in `Receipts/Food & Dining/Chipotle`
 - Undo for every move and trash
 - **Option-Command-S** from anywhere opens Shotshelf on your newest screenshot
 
+<p align="center"><img src="docs/images/viewer.png" alt="Full-screen viewer showing a code editor screenshot with a filmstrip and action buttons" width="49%"> <img src="docs/images/triage.png" alt="Triage showing one unsorted screenshot with numbered folder buttons underneath" width="49%"></p>
+
 **Tidying**
 - **Expenses:** date, merchant and amount read from every receipt, with a total and CSV export
 - **Clean Up:** exact duplicates, look-alikes (several shots of the same page) and old unopened screenshots, reviewed before anything goes to the Trash
+
+<p align="center"><img src="docs/images/expenses.png" alt="Expenses window listing receipts by date, merchant, category and amount with a total" width="49%"> <img src="docs/images/cleanup.png" alt="Clean Up window showing two identical receipt screenshots with the older copy marked for the Trash" width="49%"></p>
+
+<sub>The images above use a demo library of made-up screenshots.</sub>
 
 ## Install
 
@@ -131,6 +141,14 @@ shotshelf sort DIR [--dry-run]  sort every image under DIR (for an old pile of s
 shotshelf stats                 where everything would go with the current rules
 shotshelf expenses              receipts as CSV
 ```
+
+## Which files count as screenshots
+
+Shotshelf watches one folder, the `screenshots_dir`. Any image dropped directly into it (PNG, JPEG, HEIC, GIF, WebP, TIFF, BMP) is sorted, whatever its name, so screenshots from other tools and saved images work too. Files already in subfolders are left where they are, but they are indexed so you can browse and search them.
+
+The date a screenshot was taken comes from its name when it follows the macOS pattern (`Screenshot 2026-10-06 at 9.41.12 AM.png`, also `Screen Shot` and `CleanShot`), and from the file's creation date otherwise.
+
+To bring in an old pile from elsewhere, drag it into the folder, or run `shotshelf sort DIR`.
 
 ## Where things live
 

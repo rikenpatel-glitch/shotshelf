@@ -41,12 +41,24 @@ struct ShotshelfApp: App {
 final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         MainActor.assumeIsolated { Library.shared.start() }
-        // `open -a Shotshelf --args --open expenses` opens a window by id (main, expenses, cleanup).
+        // `open -a Shotshelf --args --open expenses` opens a window by id (main, expenses, cleanup),
+        // or the viewer / triage over the main window. `--scope Receipts` (or `all`) picks the folder first.
         let args = CommandLine.arguments
-        if let i = args.firstIndex(of: "--open"), i + 1 < args.count {
-            let id = args[i + 1]
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                MainActor.assumeIsolated { Library.shared.openWindow?(id) }
+        func value(_ flag: String) -> String? {
+            args.firstIndex(of: flag).flatMap { $0 + 1 < args.count ? args[$0 + 1] : nil }
+        }
+        let scope = value("--scope"), id = value("--open")
+        guard scope != nil || id != nil else { return }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+            MainActor.assumeIsolated {
+                let lib = Library.shared
+                if let scope { lib.scope = scope == "all" ? .all : .folder(scope) }
+                switch id {
+                case "viewer": if let s = lib.visible.first { lib.open(s) }
+                case "triage": lib.startTriage()
+                case let id?: lib.openWindow?(id)
+                case nil: break
+                }
             }
         }
     }

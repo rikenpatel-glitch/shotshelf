@@ -60,9 +60,11 @@ case "expenses":
     let iso = ISO8601DateFormatter()
     iso.formatOptions = [.withFullDate]
     print("Date,Merchant,Category,Amount,Currency,Screenshot")
-    for e in sorter.index.entries() where e.path.hasPrefix("Receipts/") {
+    func q(_ s: String) -> String { "\"" + s.replacingOccurrences(of: "\"", with: "\"\"") + "\"" }
+    var seen = Set<String>()
+    for e in sorter.index.entries() where e.path.hasPrefix("Receipts/") && (e.hash.map { seen.insert($0).inserted } ?? true) {
         let x = ReceiptParser.expense(path: e.path, text: e.text ?? "", taken: Date(timeIntervalSince1970: e.ts))
-        print([iso.string(from: x.date), x.merchant, x.category, x.amount.map { String(format: "%.2f", $0) } ?? "", x.currency, e.path].joined(separator: ","))
+        print([iso.string(from: x.date), q(x.merchant), q(x.category), x.amount.map { String(format: "%.2f", $0) } ?? "", x.currency, q(e.path)].joined(separator: ","))
     }
 default:
     usage()

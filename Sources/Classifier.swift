@@ -77,12 +77,13 @@ final class Classifier {
     private var learner: Learner?
 
     private static let menuBar = try! NSRegularExpression(
-        pattern: "^([A-Za-z][\\w.+ -]{1,24}?)\\s+(?:File|Shell|Edit)\\s+(?:Edit|View|Shell|Session|Selection|Format|Insert)\\b")
+        pattern: "^[^A-Za-z]{0,3}([A-Za-z][\\w.+ -]{1,24}?)\\s+(?:File|Shell|Edit)\\s+(?:Edit|View|Shell|Session|Selection|Format|Insert)\\b")
 
     /// The frontmost app, read from the macOS menu bar at the top of a full-screen screenshot.
     static func appName(_ text: String) -> String? {
-        for line in text.split(separator: "\n").prefix(4) {
-            let l = String(line)
+        // Vision sometimes reads the menu bar as separate pieces ("Figma", "File", "Edit View"), so also try them joined.
+        let top = text.split(separator: "\n").prefix(6).map(String.init)
+        for l in top.prefix(4) + [top.joined(separator: " ")] {
             if let m = menuBar.firstMatch(in: l, range: NSRange(l.startIndex..., in: l)), let r = Range(m.range(at: 1), in: l) {
                 return l[r].trimmingCharacters(in: .whitespaces)
             }
