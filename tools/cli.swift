@@ -45,6 +45,8 @@ case "sort":
         for r in sorter.sort(files) { counts[r.folder, default: 0] += 1 }
     }
     for (f, n) in counts.sorted(by: { $0.value > $1.value }) { print(String(format: "%5d  %@", n, f)) }
+    let waiting = files.filter(ShotFile.isInCloudOnly).count
+    if waiting > 0 { print("\n\(waiting) still in iCloud, skipped (download requested; run again once they arrive)") }
 case "stats":
     let c = Classifier(config: config, index: sorter.index)
     var counts: [String: Int] = [:]

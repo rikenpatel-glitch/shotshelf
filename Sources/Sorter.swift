@@ -102,6 +102,18 @@ enum ShotFile {
         return values?.creationDate ?? values?.contentModificationDate ?? Date()
     }
 
+    /// True for a file iCloud has offloaded: it is listed on disk but its contents are only in the cloud.
+    /// Reads the file system's dataless flag rather than asking iCloud, so it still answers when iCloud is stuck.
+    static func isInCloudOnly(_ url: URL) -> Bool {
+        var info = stat()
+        return lstat(url.path, &info) == 0 && info.st_flags & 0x40000000 != 0  // SF_DATALESS
+    }
+
+    /// Ask iCloud to bring an offloaded file down, so a later pass can read it.
+    static func requestDownload(_ url: URL) {
+        try? FileManager.default.startDownloadingUbiquitousItem(at: url)
+    }
+
     static func hash(_ url: URL) -> String? {
         guard let data = try? Data(contentsOf: url, options: .mappedIfSafe) else { return nil }
         return Insecure.SHA1.hash(data: data).map { String(format: "%02x", $0) }.joined()
@@ -160,7 +172,8 @@ final class Sorter {
         }
     }
 
-    /// Analysis for each file, reusing cached results for identical files.
+    /// Analysis for each file, reusing cached results for identical files. Files still in iCloud are left
+    /// out (and asked to download) rather than read as empty, which would send them all to the fallback folder.
     func analyze(_ files: [URL]) -> [URL: Analysis] {
         // Without this, App Nap throttles the work whenever the window isn't in front.
         let activity = ProcessInfo.processInfo.beginActivity(options: .userInitiatedAllowingIdleSystemSleep, reason: "Reading screenshots")
@@ -172,6 +185,10 @@ final class Sorter {
         ocrQueue.maxConcurrentOperationCount = max(1, min(4, ProcessInfo.processInfo.activeProcessorCount / 3))
         ocrQueue.qualityOfService = .userInitiated
         for f in files {
+            if ShotFile.isInCloudOnly(f) {
+                ShotFile.requestDownload(f)
+                continue
+            }
             ocrQueue.addOperation { [index] in
                 let hash = ShotFile.hash(f)
                 var result: Analysis
@@ -221,7 +238,7 @@ final class Sorter {
         let results = analyze(files)
         var sorted: [SortResult] = []
         for f in files {
-            let a = results[f] ?? Analysis(text: "")
+            guard let a = results[f] else { continue }
             let folder = classifier.classify(a.text, labels: a.labels)
             if let dest = try? move(f, to: folder, how: "auto", analysis: a) {
                 sorted.append(SortResult(name: dest.deletingPathExtension().lastPathComponent, folder: folder, path: relative(dest)))

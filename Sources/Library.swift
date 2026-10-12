@@ -160,7 +160,8 @@ final class Library {
         sorting = true
         let sorter = self.sorter
         sorter.queue.async { [weak self] in
-            let pending = sorter.inboxFiles(settled: false).count
+            // Files still in iCloud are retried when they finish downloading and the folder changes.
+            let pending = sorter.inboxFiles(settled: false).filter { !ShotFile.isInCloudOnly($0) }.count
             let results = sorter.sortInbox()
             DispatchQueue.main.async {
                 guard let self else { return }
