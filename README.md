@@ -36,7 +36,7 @@ Take a screenshot of a receipt and it lands in `Receipts/Food & Dining/Chipotle`
 Requirements: macOS 14 or later and the Xcode Command Line Tools (`xcode-select --install`). Xcode itself is not needed.
 
 ```bash
-git clone https://github.com/<you>/shotshelf.git
+git clone https://github.com/rikenpatel02/shotshelf.git
 cd shotshelf
 ./build.sh --install          # builds Shotshelf.app and copies it to /Applications
 open /Applications/Shotshelf.app
