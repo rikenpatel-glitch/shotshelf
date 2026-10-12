@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleName</key>
+    <string>Shotshelf</string>
+    <key>CFBundleDisplayName</key>
+    <string>Shotshelf</string>
+    <key>CFBundleIdentifier</key>
+    <string>app.shotshelf.Shotshelf</string>
+    <key>CFBundleExecutable</key>
+    <string>Shotshelf</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleShortVersionString</key>
+    <string>1.0.0</string>
+    <key>CFBundleVersion</key>
+    <string>1</string>
+    <key>CFBundleIconFile</key>
+    <string>AppIcon</string>
+    <key>LSMinimumSystemVersion</key>
+    <string>14.0</string>
+    <key>LSApplicationCategoryType</key>
+    <string>public.app-category.productivity</string>
+    <key>NSHighResolutionCapable</key>
+    <true/>
+    <key>NSDesktopFolderUsageDescription</key>
+    <string>Shotshelf sorts the screenshots saved on your Desktop into folders.</string>
+    <key>NSDocumentsFolderUsageDescription</key>
+    <string>Shotshelf reads your code folders to sort development screenshots by project.</string>
+    <key>NSDownloadsFolderUsageDescription</key>
+    <string>Shotshelf sorts screenshots saved in your Downloads folder.</string>
+    <key>NSHumanReadableCopyright</key>
+    <string>MIT License</string>
+</dict>
+</plist>

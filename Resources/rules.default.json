@@ -1,5 +1,5 @@
 {
-  "_comment": "Default sorting rules. Copy any part into ~/.config/shotshelf/config.json under \"rules\" / \"gates\" to customize. Each keyword match scores +1, each strong match +3. The best-scoring rule at or above its min_score wins; otherwise the screenshot goes to the fallback folder.",
+  "_comment": "Default sorting rules. Copy any part into ~/.config/shotshelf/config.json under \"rules\" / \"gates\" to customize. Each keyword match scores +1, each strong match +3. The best-scoring rule at or above its min_score wins; otherwise the screenshot goes to the fallback folder. \"labels\" match what Apple's image recognition sees (for screenshots with little text, up to max_text characters); \"apps\" match the app name in the menu bar (+3).",
   "fallback": "General",
   "gates": {
     "receipt": {
@@ -349,11 +349,33 @@
         "console.log",
         "npm run",
         "localhost:"
+      ],
+      "apps": [
+        "terminal",
+        "iterm2",
+        "iterm",
+        "code",
+        "visual studio code",
+        "xcode",
+        "cursor",
+        "android studio",
+        "intellij idea",
+        "webstorm",
+        "pycharm",
+        "docker desktop",
+        "postman",
+        "warp",
+        "ghostty",
+        "github desktop",
+        "sourcetree",
+        "tower",
+        "simulator",
+        "electron"
       ]
     },
     {
       "folder": "AI Chats",
-      "min_score": 3,
+      "min_score": 4,
       "keywords": [
         "chatgpt",
         "gpt",
@@ -377,7 +399,11 @@
         "perplexity.ai",
         "gemini.google.com"
       ],
-      "require_strong": true
+      "apps": [
+        "chatgpt",
+        "claude",
+        "perplexity"
+      ]
     },
     {
       "folder": "Chats & Messages",
@@ -411,7 +437,20 @@
         "messenger",
         "wechat"
       ],
-      "require_strong": true
+      "require_strong": true,
+      "apps": [
+        "messages",
+        "whatsapp",
+        "slack",
+        "discord",
+        "telegram",
+        "microsoft teams",
+        "teams",
+        "signal",
+        "messenger",
+        "wechat",
+        "zoom"
+      ]
     },
     {
       "folder": "Finance",
@@ -481,6 +520,13 @@
         "capital gain",
         "tax return",
         "turbotax"
+      ],
+      "apps": [
+        "tradingview",
+        "thinkorswim",
+        "robinhood",
+        "webull",
+        "stocks"
       ]
     },
     {
@@ -522,6 +568,14 @@
         "dmv",
         "operating agreement",
         "terms and conditions"
+      ],
+      "apps": [
+        "preview",
+        "pages",
+        "microsoft word",
+        "word",
+        "acrobat",
+        "adobe acrobat"
       ]
     },
     {
@@ -615,7 +669,10 @@
         "waze",
         "yelp"
       ],
-      "require_strong": true
+      "require_strong": true,
+      "apps": [
+        "maps"
+      ]
     },
     {
       "folder": "School & Learning",
@@ -716,6 +773,125 @@
       "unless": [
         "localhost",
         "127.0.0.1"
+      ],
+      "apps": [
+        "figma",
+        "sketch",
+        "framer",
+        "affinity designer",
+        "pixelmator pro",
+        "adobe photoshop",
+        "adobe illustrator",
+        "canva"
+      ]
+    },
+    {
+      "folder": "Photos/People",
+      "max_text": 80,
+      "min_score": 1,
+      "labels": [
+        "people",
+        "adult",
+        "child",
+        "baby",
+        "portrait",
+        "selfie",
+        "crowd",
+        "teen",
+        "wedding"
+      ]
+    },
+    {
+      "folder": "Photos/Vehicles",
+      "max_text": 80,
+      "min_score": 1,
+      "labels": [
+        "automobile",
+        "car",
+        "vehicle",
+        "wheel",
+        "tire",
+        "rim",
+        "motorcycle",
+        "truck",
+        "dashboard"
+      ]
+    },
+    {
+      "folder": "Photos/Food",
+      "max_text": 80,
+      "min_score": 1,
+      "labels": [
+        "food",
+        "dessert",
+        "drink",
+        "meal",
+        "fruit",
+        "vegetable",
+        "baked_goods",
+        "pizza",
+        "beverage",
+        "coffee",
+        "dish"
+      ]
+    },
+    {
+      "folder": "Photos/Animals",
+      "max_text": 80,
+      "min_score": 1,
+      "labels": [
+        "animal",
+        "dog",
+        "cat",
+        "bird",
+        "mammal",
+        "pet",
+        "horse",
+        "fish"
+      ]
+    },
+    {
+      "folder": "Photos/Places",
+      "max_text": 80,
+      "min_score": 1,
+      "labels": [
+        "outdoor",
+        "sky",
+        "landscape",
+        "mountain",
+        "beach",
+        "sunset_sunrise",
+        "building",
+        "cityscape",
+        "nature",
+        "forest",
+        "water_body",
+        "interior_room"
+      ]
+    },
+    {
+      "folder": "Art & Illustrations",
+      "max_text": 80,
+      "min_score": 1,
+      "labels": [
+        "art",
+        "illustrations",
+        "painting",
+        "drawing",
+        "cartoon",
+        "sketch"
+      ]
+    },
+    {
+      "folder": "Documents/Charts & Diagrams",
+      "max_text": 80,
+      "min_score": 1,
+      "labels": [
+        "chart",
+        "diagram",
+        "document",
+        "printed_page",
+        "handwriting"
       ]
     }
   ]

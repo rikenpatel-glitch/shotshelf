@@ -1,85 +1,77 @@
 # Shotshelf
 
-Auto-sort your macOS screenshots into folders, and browse them in a fast, good-looking local viewer.
+A Mac app that files every screenshot you take into the right folder, and gives you a fast place to browse, search and tidy them.
 
-Take a screenshot of a receipt and it lands in `Receipts/Food & Dining/Chipotle`. Screenshot your code editor and it lands in `Development/my-project`. Anything Shotshelf can't place goes to `General`, where a one-key triage mode lets you send each one to the right folder in a second.
+Take a screenshot of a receipt and it lands in `Receipts/Food & Dining/Chipotle`. Screenshot your code editor and it lands in `Development/my-project`. A photo of a friend goes to `Photos/People`. Anything Shotshelf can't place goes to `General`, where Triage lets you file each one with a single key, and Shotshelf learns from what you choose.
 
-- **Private by design.** Text is read on your Mac with Apple's Vision framework. Nothing is uploaded, no API keys, no telemetry.
-- **Zero dependencies.** Python standard library, one Swift file, one HTML file. No `pip install`, no `npm install`.
-- **Real folders.** Sorting moves files into ordinary folders, so Finder, Spotlight and backups all keep working. Delete Shotshelf and your folders stay.
-- **Learns from you.** Create `Receipts/Food & Dining/Joe's Pizza` once, and future Joe's Pizza receipts go there automatically. Same for project folders.
+- **Private.** Text and images are read on your Mac with Apple's Vision framework. Nothing is uploaded, no accounts, no telemetry.
+- **Real folders.** Sorting moves files into ordinary folders, so Finder, Spotlight and backups keep working. Quit Shotshelf and everything stays put.
+- **Native and light.** SwiftUI, about 2 MB, no dependencies. Lives in the menu bar and starts at login.
 
-## The viewer
+## Features
 
-- Folder tree with counts, drag and drop screenshots onto any folder
-- Full-text search over the words inside every screenshot
-- Lightbox with filmstrip, shuffle, slideshow and a recognized-text panel
-- Triage mode for `General`: press `1`-`9` to send a screenshot to a folder, `Space` to skip, `Z` to undo
-- Multi-select (`Cmd`-click, `Shift`-click, `Cmd+A`), move with `M`, re-run auto-sort, reveal in Finder, move to Trash
-- Undo on every move, light and dark themes, respects reduced motion
+**Sorting**
+- Reads the text in every new screenshot within a few seconds and files it by keyword rules
+- Sorts development screenshots by project, by finding your project folders' names on screen
+- Spots the app in the menu bar (Terminal, Slack, Figma...) as an extra clue
+- Recognizes photos with no text: people, vehicles, food, animals, places, art, charts
+- Learns from you: move a screenshot by hand and similar ones follow it next time
+- Create `Receipts/Food & Dining/Joe's Pizza` once, and Joe's Pizza receipts go there from then on
+- A notification after each sort, with a **Move...** button if it guessed wrong
 
-## Requirements
+**Browsing**
+- Folder sidebar with counts; drag screenshots onto any folder, or drag them out into other apps
+- Search the words inside every screenshot
+- Full-screen viewer with filmstrip, shuffle, slideshow, recognized text and Copy Text
+- Triage for `General`: `1`-`9` sends the screenshot to a folder, `Space` skips, `Z` undoes
+- Undo for every move and trash
+- **Option-Command-S** from anywhere opens Shotshelf on your newest screenshot
 
-- macOS 12 or later
-- Python 3.9+ (`/usr/bin/python3` works)
-- Xcode Command Line Tools for the Swift compiler: `xcode-select --install`
+**Tidying**
+- **Expenses:** date, merchant and amount read from every receipt, with a total and CSV export
+- **Clean Up:** exact duplicates, look-alikes (several shots of the same page) and old unopened screenshots, reviewed before anything goes to the Trash
 
 ## Install
+
+Requirements: macOS 14 or later and the Xcode Command Line Tools (`xcode-select --install`). Xcode itself is not needed.
 
 ```bash
 git clone https://github.com/<you>/shotshelf.git
 cd shotshelf
-python3 shotshelf.py init        # writes ~/.config/shotshelf/config.json
-python3 shotshelf.py install     # starts the watcher + viewer, and at every login
-open http://127.0.0.1:8765
+./build.sh --install          # builds Shotshelf.app and copies it to /Applications
+open /Applications/Shotshelf.app
 ```
 
-`install` registers two LaunchAgents in `~/Library/LaunchAgents`:
+On first launch Shotshelf asks where your screenshots should live (default `~/Pictures/Screenshots`) and can point macOS's screenshot location there for you. Allow notifications if you want the Move button after each sort.
 
-| Job | What it does |
-|---|---|
-| `com.shotshelf.watch` | Runs `shotshelf.py sort` whenever a file appears in your screenshots folder |
-| `com.shotshelf.serve` | Keeps the viewer running on `127.0.0.1:8765` (localhost only) |
+`./build.sh --universal` builds for both Apple silicon and Intel.
 
-Logs go to `~/Library/Logs/shotshelf.log`. Remove everything with `python3 shotshelf.py uninstall`; your screenshots are never touched.
+### Folder permissions and rebuilding
 
-### If your screenshots are on the Desktop or in Documents
+macOS asks once for permission to read protected folders like Desktop or Documents. An unsigned (ad hoc) build counts as a new app every time you rebuild, so macOS asks again. To avoid that, create a local signing identity once; `build.sh` uses it automatically:
 
-macOS protects those folders. The first time the background job runs, macOS may block it silently. Fix it once in **System Settings > Privacy & Security > Files and Folders** (or **Full Disk Access**) by allowing the Python shown in the log. The simplest option is to save screenshots somewhere unprotected:
+1. Open **Keychain Access** > **Certificate Assistant** > **Create a Certificate...**
+2. Name it `Shotshelf Local Signing`, Identity Type **Self Signed Root**, Certificate Type **Code Signing**.
 
-```bash
-mkdir -p ~/Pictures/Screenshots
-defaults write com.apple.screencapture location ~/Pictures/Screenshots
-```
-
-Then set `"screenshots_dir": "~/Pictures/Screenshots"` in your config and run `install` again.
-
-## Sort what you already have
-
-```bash
-python3 shotshelf.py sort --path ~/Desktop/Old\ Screenshots --dry-run   # preview
-python3 shotshelf.py sort --path ~/Desktop/Old\ Screenshots             # move them
-```
-
-Text recognition takes about 1-2 seconds per screenshot. Results are cached by file content, so nothing is read twice.
+Or set `SHOTSHELF_SIGN_IDENTITY` to the name of any code-signing identity you already have.
 
 ## Configuration
 
-`~/.config/shotshelf/config.json`:
+Settings (the menu bar icon > Settings) covers the screenshots folder, your code folders, notifications and login. Everything else lives in `~/.config/shotshelf/config.json`:
 
 ```json
 {
-  "screenshots_dir": "~/Desktop/Screenshots",
+  "screenshots_dir": "~/Pictures/Screenshots",
   "projects_dirs": ["~/code"],
   "project_ignore": ["archive"],
   "project_generic_names": ["portfolio"],
-  "port": 8765,
   "extra_rules": [
     {
       "folder": "Work/Jira",
       "min_score": 3,
       "keywords": ["sprint", "story points", "backlog"],
-      "strong": ["jira", "atlassian"]
+      "strong": ["jira", "atlassian"],
+      "apps": ["jira"]
     }
   ]
 }
@@ -87,48 +79,57 @@ Text recognition takes about 1-2 seconds per screenshot. Results are cached by f
 
 | Key | Meaning |
 |---|---|
-| `screenshots_dir` | The inbox. New screenshots here get sorted into subfolders of it. |
-| `projects_dirs` | Folders containing your code projects. Any folder with a `package.json`, `.git`, `pyproject.toml`, etc. becomes a `Development/<project>` destination, matched by its name appearing in the screenshot. Group folders (like `clients/acme-site`) are kept as `Development/clients/acme-site`. |
-| `project_ignore` | Folder names under `projects_dirs` to skip entirely. |
-| `project_generic_names` | Folder names that are still scanned for projects but are too common to match as words (for example `portfolio`). |
-| `extra_rules` | Your own rules, checked alongside the defaults. Add `"rules": [...]` instead to replace the defaults completely. |
+| `screenshots_dir` | The inbox. New screenshots here are sorted into subfolders of it. |
+| `projects_dirs` | Folders holding your code. Any folder with a `package.json`, `.git`, `pyproject.toml`, `Package.swift` and so on becomes a `Development/<project>` destination. Group folders (`clients/acme-site`) keep their group. |
+| `project_ignore` | Folder names under `projects_dirs` to skip. |
+| `project_generic_names` | Folder names too common to match as words on screen (they are still scanned for projects). |
+| `extra_rules` | Your own rules, checked alongside the defaults. Use `"rules"` instead to replace the defaults entirely. |
+
+After editing, choose **Reload** in Settings.
 
 ### How a screenshot is sorted
 
-1. Apple Vision reads the text.
-2. Every rule in [`rules.default.json`](rules.default.json) is scored: `+1` per keyword found, `+3` per strong keyword, `+4` when a project name matches. Receipt rules only apply when the text looks like a receipt (an amount like `$12.34` plus words like *total*, *tax*, *paid*).
-3. The highest score at or above the rule's `min_score` wins. `{merchant}` and `{project}` in a folder name are filled in from what matched.
-4. If nothing qualifies, the file goes to `General`.
+1. Vision reads the text. If there is little text, it also labels what the image shows.
+2. Every rule in [`Resources/rules.default.json`](Resources/rules.default.json) is scored:
 
-To see why a file went where it did:
+   | Signal | Points |
+   |---|---|
+   | keyword found | +1 |
+   | strong keyword found (a brand or site name) | +3 |
+   | app in the menu bar matches the rule's `apps` | +3 |
+   | image label matches the rule's `labels` | +2 |
+   | a project name appears on screen | +5 to +8 |
+   | known merchant found | +1 |
+   | it's a receipt (an amount like `$12.34` plus words like *total*, *tax*, *paid*) | +2, and required by receipt rules |
 
-```bash
-python3 shotshelf.py explain ~/Desktop/Screenshots/General/Screenshot\ 2026-05-01\ at\ 9.41.12\ AM.png
-```
+3. Screenshots you filed by hand are compared to the new one (TF-IDF similarity). A close match suggests the same folder and usually wins.
+4. The highest score at or above the rule's `min_score` wins. `{merchant}` and `{project}` in a folder name are filled in. Otherwise: `General`.
+
+Lines that only ever appear next to your browser's bookmarks bar are learned and ignored for project matching, so a bookmark named after a project doesn't drag every browser screenshot into it.
 
 ### Default folders
 
-`Receipts/{Food & Dining, Bills & Autopay, Shopping, Travel & Rides, Other}`, `Development/<project>`, `AI Chats`, `Chats & Messages`, `Finance`, `Documents`, `Social`, `Travel`, `Maps & Places`, `Design & Inspiration`, `General`.
+`Receipts/{Food & Dining, Bills & Autopay, Shopping, Travel & Rides, Other}`, `Development/<project>`, `AI Chats`, `Chats & Messages`, `Finance`, `Documents`, `Documents/Charts & Diagrams`, `Social`, `Travel`, `Maps & Places`, `School & Learning`, `Design & Inspiration`, `Photos/{People, Vehicles, Food, Animals, Places}`, `Art & Illustrations`, `General`.
 
 ## Keyboard shortcuts
 
 | Where | Keys |
 |---|---|
-| Grid | `/` search, `Cmd+A` select all, `M` move, `Delete` trash, `S` shuffle, `P` slideshow, `T` triage, `Esc` clear |
-| Lightbox | `Left`/`Right` navigate, `Space` play/pause, `S` shuffle, `T` text, `M` move, `Delete` trash, `Esc` close |
+| Anywhere | `Option-Command-S` open Shotshelf on the newest screenshot |
+| Grid | arrows select, `Space` open, `M` move, `Delete` trash, `R` auto-sort again, `S` shuffle, `P` slideshow, `T` triage, `Command-A` select all, `Esc` clear |
+| Viewer | `Left`/`Right`, `Space` play/pause, `S` shuffle, `T` text, `C` copy text, `M` move, `Delete` trash, `Esc` close |
 | Triage | `1`-`9` send, `/` any folder, `Space` skip, `Z` undo, `Esc` done |
-| Move dialog | type to filter, type a new path to create it, `Enter` to move |
+| Menus | `Shift-Command-N` new folder, `Shift-Command-E` expenses, `Shift-Command-K` clean up, `Shift-Command-C` copy text, `Command-R` show in Finder |
 
-## Commands
+## Command-line tool
+
+`./build.sh` also builds `build/shotshelf`, which shares the app's sorting code:
 
 ```
-shotshelf.py init                 create the config file
-shotshelf.py sort                 sort new screenshots in the inbox
-shotshelf.py sort --path DIR      sort every image under DIR (add --dry-run to preview)
-shotshelf.py explain FILE         show the scores behind a decision
-shotshelf.py index                read text of every screenshot for search
-shotshelf.py serve [--open]       run the viewer in the foreground
-shotshelf.py install / uninstall  manage the background jobs
+shotshelf explain FILE          why a screenshot goes where it does
+shotshelf sort DIR [--dry-run]  sort every image under DIR (for an old pile of screenshots)
+shotshelf stats                 where everything would go with the current rules
+shotshelf expenses              receipts as CSV
 ```
 
 ## Where things live
@@ -136,12 +137,20 @@ shotshelf.py install / uninstall  manage the background jobs
 | What | Path |
 |---|---|
 | Config | `~/.config/shotshelf/config.json` |
-| Search index and thumbnails | `~/Library/Application Support/Shotshelf/` (safe to delete; rebuilt automatically) |
-| Log | `~/Library/Logs/shotshelf.log` |
+| Search index (text, image labels, fingerprints) | `~/Library/Application Support/Shotshelf/` (safe to delete; rebuilt automatically) |
 
-## Security
+## Project layout
 
-The viewer binds to `127.0.0.1` only, rejects requests whose `Host` isn't localhost (DNS-rebinding protection), requires a custom header on every write (so other websites can't trigger moves), and refuses any path outside your screenshots folder. Trash moves files to `~/.Trash`, so they can be recovered.
+```
+Sources/        the app (SwiftUI) and its sorting engine
+  Classifier    rules, project discovery, learning from your moves
+  Sorter        Vision text + image labels, moving files, keeping the index in sync
+  Index         SQLite cache and search
+  Library       app state: folders, selection, moves, undo
+Resources/      Info.plist, icon, default rules
+tools/          command-line tool, icon generator
+build.sh        builds the app with swiftc
+```
 
 ## License
 
